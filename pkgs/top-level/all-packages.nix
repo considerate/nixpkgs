@@ -1788,6 +1788,8 @@ with pkgs;
 
   anbox = callPackage ../os-specific/linux/anbox { };
 
+  anbox-postmarketos-image = callPackage ../os-specific/linux/anbox/postmarketos-image.nix { };
+
   androidenv = callPackage ../development/mobile/androidenv {
     pkgs_i686 = pkgsi686Linux;
   };
