@@ -44,7 +44,7 @@
 
 buildPythonPackage rec {
   pname = "poetry";
-  version = "1.4.2";
+  version = "1.5.1";
   format = "pyproject";
 
   disabled = pythonOlder "3.7";
@@ -53,7 +53,7 @@ buildPythonPackage rec {
     owner = "python-poetry";
     repo = pname;
     rev = "refs/tags/${version}";
-    hash = "sha256-AiRQFZA5+M1niTzj1RO2lx0QFOMmSzpQo1gzauyTblg=";
+    hash = "sha256-1zqfGzSI5RDACSNcz0tLA4VKMFwE5uD/YqOkgpzg2nQ=";
   };
 
   nativeBuildInputs = [
@@ -141,6 +141,7 @@ buildPythonPackage rec {
     "test_prepare_directory"
     "test_prepare_directory_with_extensions"
     "test_prepare_directory_editable"
+    "test_installer_with_pypi_repository"
   ] ++ lib.optionals (pythonAtLeast "3.10") [
     # RuntimeError: 'auto_spec' might be a typo; use unsafe=True if this is intended
     "test_info_setup_complex_pep517_error"
@@ -154,7 +155,7 @@ buildPythonPackage rec {
   # Unset ambient PYTHONPATH in the wrapper, so Poetry only ever runs with its own,
   # isolated set of dependencies. This works because the correct PYTHONPATH is set
   # in the Python script, which runs after the wrapper.
-  makeWrapperArgs = ["--unset PYTHONPATH"];
+  makeWrapperArgs = [ "--unset PYTHONPATH" ];
 
   meta = with lib; {
     changelog = "https://github.com/python-poetry/poetry/blob/${src.rev}/CHANGELOG.md";
