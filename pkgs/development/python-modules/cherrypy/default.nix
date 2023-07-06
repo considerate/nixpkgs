@@ -84,6 +84,20 @@ buildPythonPackage rec {
     "test_4_File_deletion"
   ] ++ lib.optionals stdenv.isDarwin [
     "test_block"
+  ] ++ lib.optionals (pythonAtLeast "3.11") [
+    "test_HTTP10_KeepAlive"
+    "test_No_Message_Body"
+    "test_HTTP11_Timeout"
+    "testGzip"
+    "test_malformed_header"
+    "test_no_content_length"
+    "test_post_filename_with_special_characters"
+    "test_post_multipart"
+    "test_iterator"
+    "testErrorHandling"
+    "test_1_Ram_Concurrency"
+    "test_2_File_Concurrency"
+    "testHookErrors"
   ];
 
   disabledTestPaths = lib.optionals stdenv.isDarwin [
