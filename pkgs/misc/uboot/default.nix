@@ -296,6 +296,50 @@ in
   };
 
   # Flashing instructions:
+  # dd if=u-boot.bin of=<device> conv=fsync,notrunc bs=512 skip=1 seek=1
+  # dd if=u-boot.bin of=<device> conv=fsync,notrunc bs=1 count=440
+  ubootOdroidHC4 =
+    let
+      firmwareBlobs = fetchFromGitHub {
+        owner = "LibreELEC";
+        repo = "amlogic-boot-fip";
+        rev = "c4bf0e3b1ab1246c3176d6c3e420a5e1cdf40c4e";
+        hash = "sha256-8qFLIs3yrT5rHtqwtb0TzuDgbCbs5kMnIktKnoiuyew=";
+        meta.license = lib.licenses.unfreeRedistributableFirmware;
+      };
+    in
+    buildUBoot {
+      defconfig = "odroid-c4_defconfig";
+      extraMeta.platforms = [ "aarch64-linux" ];
+      filesToInstall = [ "u-boot.bin" ];
+      postBuild = ''
+        mkdir $out
+        FIPDIR=${firmwareBlobs}/odroid-hc4
+        ${buildPackages.meson64-tools}/bin/meson64-g12-pkg --type bl30 --output bl30.pkg $FIPDIR/bl30.bin $FIPDIR/bl301.bin
+        ${buildPackages.meson64-tools}/bin/meson64-g12-pkg --type bl2 --output bl2.pkg $FIPDIR/bl2.bin $FIPDIR/acs.bin
+        ${buildPackages.meson64-tools}/bin/meson64-g12-bl30sig --input bl30.pkg --output bl30.30sig
+        ${buildPackages.meson64-tools}/bin/meson64-g12-bl3sig --input bl30.30sig --output bl30.3sig
+        ${buildPackages.meson64-tools}/bin/meson64-g12-bl3sig --input $FIPDIR/bl31.img --output bl31.3sig
+        ${buildPackages.meson64-tools}/bin/meson64-g12-bl3sig --input u-boot.bin --output bl33.3sig
+        ${buildPackages.meson64-tools}/bin/meson64-g12-bl2sig --input bl2.pkg --output bl2.2sig
+        ${buildPackages.meson64-tools}/bin/meson64-g12-bootmk --output $out/u-boot.bin \
+          --bl2 bl2.2sig \
+          --bl30 bl30.3sig \
+          --bl31 bl31.3sig \
+          --bl33 bl33.3sig \
+          --ddrfw1 $FIPDIR/ddr4_1d.fw \
+          --ddrfw2 $FIPDIR/ddr4_2d.fw \
+          --ddrfw3 $FIPDIR/ddr3_1d.fw \
+          --ddrfw4 $FIPDIR/piei.fw \
+          --ddrfw5 $FIPDIR/lpddr4_1d.fw \
+          --ddrfw6 $FIPDIR/lpddr4_2d.fw \
+          --ddrfw7 $FIPDIR/diag_lpddr4.fw \
+          --ddrfw8 $FIPDIR/aml_ddr.fw \
+          --ddrfw9 $FIPDIR/lpddr3_1d.fw
+      '';
+    };
+
+  # Flashing instructions:
   # dd if=bl1.bin.hardkernel of=<device> conv=fsync bs=1 count=442
   # dd if=bl1.bin.hardkernel of=<device> conv=fsync bs=512 skip=1 seek=1
   # dd if=u-boot.gxbb of=<device> conv=fsync bs=512 seek=97
